@@ -1,5 +1,5 @@
 #!/bin/bash
-app="texasholdem"
+app="congress-lookup"
 docker stop ${app}
 docker rm ${app}
 docker rmi ${app}

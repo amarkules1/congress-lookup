@@ -28,4 +28,4 @@ dist
 venv
 
 .env
-nfl-stats-tracker-frontend/.env
+congress-lookup-frontend/.env

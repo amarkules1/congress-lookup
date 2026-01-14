@@ -17,8 +17,8 @@ RUN apt-get update && apt-get install -y gcc libpq-dev && \
 # Copy main.py to the working directory
 COPY main.py .
 
-# Copy nfl-stats-tracker-frontend/dist directory to the same in the container
-COPY nfl-stats-tracker-frontend/dist nfl-stats-tracker-frontend/dist
+# Copy congress-lookup-frontend/dist directory to the same in the container
+COPY congress-lookup-frontend/dist congress-lookup-frontend/dist
 
 # Expose port 5003
 EXPOSE 5003

@@ -1,8 +1,8 @@
-# nfl-stats-tracker
+# congress-lookup
 
 ## Description
 
-Tracks NFL Stats and betting odds.
+Shows some information about congress members.
 
 ## Development
 
@@ -12,4 +12,4 @@ run app: `pipenv run flask --app main:app run`
 
 regen requirements.txt after adding a dependency: `pipenv requirements > requirements.txt`
 
-regenerate frontend assets (from `/nfl-stats-tracker-frontend`): `npm i && npm run build`
+regenerate frontend assets (from `/congress-lookup-frontend`): `npm i && npm run build`
