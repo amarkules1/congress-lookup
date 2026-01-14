@@ -1,79 +1,35 @@
-
-import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
-import { Party, CongressMember, GroundingSource } from "../types";
-
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
-
-const SYSTEM_INSTRUCTION = `
-You are a political data analyst assistant. Your task is to provide accurate, up-to-date information about members of the U.S. Congress.
-When a user searches for a member, you must:
-1. Identify the correct member (Senator or Representative).
-2. Retrieve their current standing committees.
-3. Identify top 5 industries they are most involved with (based on campaign contributions or legislative focus).
-
-CRITICAL: Return your response ONLY in the following JSON format within your text response. Do not include any other conversational text.
-{
-  "name": "Full Name",
-  "title": "Senator / Representative",
-  "party": "Democrat / Republican / Independent",
-  "state": "State Code",
-  "district": "District Number (if applicable)",
-  "committees": ["Committee 1", "Committee 2"],
-  "industries": [
-    {"name": "Industry Name", "involvementScore": 85, "amount": 100000}
-  ]
-}
-`;
+import { CongressMember } from "../types";
 
 export const searchCongressMember = async (query: string): Promise<CongressMember | null> => {
   try {
-    const response: GenerateContentResponse = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: `Search for this member of Congress: ${query}. Provide their current committees and industry involvement.`,
-      config: {
-        systemInstruction: SYSTEM_INSTRUCTION,
-        tools: [{ googleSearch: {} }],
-        temperature: 0.1,
+    // In development mode with separate frontend/backend servers, you might need the full URL
+    // e.g., 'http://localhost:5000/api/search' if not proxied.
+    // Assuming relative path works (proxy setup or served by Flask) or CORS allows localhost:5000.
+    // We will try a relative path first, which is best for production.
+    // If running Vite locally without proxy to 5000, this might fail unless we use absolute.
+    // Given CORS is enabled in backend, let's allow an env var or default to relative.
+
+    // For simplicity in this refactor, we'll try relative. If user runs `pipenv run flask`, it serves safely.
+    // If they run `npm run dev`, they might need to proxy. 
+    // Let's assume the user might be running frontend separate. 
+    // We will default to relative path.
+    const baseUrl = '';
+    const response = await fetch(`${baseUrl}/api/search`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
       },
+      body: JSON.stringify({ query }),
     });
 
-    const text = response.text;
-    if (!text) return null;
-
-    // Extract JSON from the response text
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) return null;
-
-    const rawData = JSON.parse(jsonMatch[0]);
-
-    // Extract grounding sources
-    const sources: GroundingSource[] = [];
-    const chunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks;
-    if (chunks) {
-      chunks.forEach((chunk: any) => {
-        if (chunk.web && chunk.web.uri) {
-          sources.push({
-            title: chunk.web.title || chunk.web.uri,
-            uri: chunk.web.uri
-          });
-        }
-      });
+    if (!response.ok) {
+      console.error(`Backend returned code ${response.status}: ${response.statusText}`);
+      const text = await response.text();
+      console.error("Response body:", text);
+      return null;
     }
 
-    // Map to our internal type
-    const member: CongressMember = {
-      id: Math.random().toString(36).substr(2, 9),
-      name: rawData.name,
-      title: rawData.title,
-      party: rawData.party as Party,
-      state: rawData.state,
-      district: rawData.district,
-      imageUrl: `https://picsum.photos/400/400?random=${Math.floor(Math.random() * 1000)}`, // Using picsum as placeholder for bio photo
-      committees: rawData.committees || [],
-      industries: rawData.industries || [],
-      sources: sources
-    };
-
+    const member: CongressMember = await response.json();
     return member;
   } catch (error) {
     console.error("Error fetching congress member data:", error);

@@ -1,0 +1,34 @@
+2026-01-13 21:40:21,970 - main - ERROR - API_KEY not found in environment variables
+2026-01-13 21:44:17,108 - main - ERROR - Error calling Gemini API: Expecting ',' delimiter: line 12 column 40 (char 435)
+2026-01-13 21:45:23,029 - main - INFO - Gemini Raw Text: ```json
+{
+  "name": "Nancy Pelosi",
+  "title": "Representative",
+  "party": "Democrat",
+  "state": "CA",
+  "district": "11",
+  "committees": [],
+  "industries": [
+    {"name": "Finance/Investments", "involvementScore": 95, "amount": "N/A (significant)"},
+    {"name": "Venture Capital & Private Equity", "involvementScore": 90, "amount": "N/A (significant)"},
+    {"name": "Health Services/HMOs", "involvementScore": 88, "amount": "N/A (significant)"},
+    {"name": "Lawyers & Lobbyists", "involvementScore": 87, "amount": "N/A (significant)"},
+    {"name": "Technology/Internet", "involvementScore": 85, "amount": "N/A (significant)"}
+  ]
+}
+```
+2026-01-13 21:45:23,030 - main - INFO - Extracted JSON: {
+  "name": "Nancy Pelosi",
+  "title": "Representative",
+  "party": "Democrat",
+  "state": "CA",
+  "district": "11",
+  "committees": [],
+  "industries": [
+    {"name": "Finance/Investments", "involvementScore": 95, "amount": "N/A (significant)"},
+    {"name": "Venture Capital & Private Equity", "involvementScore": 90, "amount": "N/A (significant)"},
+    {"name": "Health Services/HMOs", "involvementScore": 88, "amount": "N/A (significant)"},
+    {"name": "Lawyers & Lobbyists", "involvementScore": 87, "amount": "N/A (significant)"},
+    {"name": "Technology/Internet", "involvementScore": 85, "amount": "N/A (significant)"}
+  ]
+}
