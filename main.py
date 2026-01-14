@@ -76,6 +76,38 @@ def search_congress_member():
         logger.error("GEMINI_API_KEY not found in environment variables")
         return {"error": "Server configuration error"}, 500
 
+    # 1. Check Cache
+    try:
+        # We need a new cursor for this request logic preferably, 
+        # but let's use the global one carefully or make a new one. 
+        # Flask is threaded, using a single global connection without pooling is unsafe for concurrent requests.
+        # However, looking at lines 35-36, it seems db_conn is global.
+        # For this refactor, I will create a new cursor from the global connection, 
+        # but ideally we should handle connections better.
+        # Let's commit to using the global connection logic present in the file.
+        
+        with db_conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            # Check if we have a fresh record for a member matching the query
+            # We search for a name similar to the query.
+            search_query = f"%{query}%"
+            cur.execute("""
+                SELECT * FROM congress_members_cache 
+                WHERE name ILIKE %s 
+                AND last_updated > NOW() - INTERVAL '90 days'
+                LIMIT 1
+            """, (search_query,))
+            cached_result = cur.fetchone()
+            
+            if cached_result:
+                logger.info(f"Cache hit for query '{query}' -> '{cached_result['name']}'")
+                return cached_result['data']
+    
+    except Exception as e:
+        logger.error(f"Error checking cache: {e}")
+        # Proceed to API if cache check fails
+        db_conn.rollback()
+
+
     try:
         client = genai.Client(api_key=api_key)
         
@@ -127,6 +159,21 @@ def search_congress_member():
             "industries": raw_data.get("industries", []),
             "sources": sources
         }
+
+        # 2. Save to Cache
+        try:
+            with db_conn.cursor() as cur:
+                cur.execute("""
+                    INSERT INTO congress_members_cache (name, data, last_updated)
+                    VALUES (%s, %s, NOW())
+                    ON CONFLICT (name) 
+                    DO UPDATE SET data = EXCLUDED.data, last_updated = NOW()
+                """, (member['name'], json.dumps(member)))
+                db_conn.commit()
+                logger.info(f"Cached result for '{member['name']}'")
+        except Exception as e:
+            logger.error(f"Error saving to cache: {e}")
+            db_conn.rollback()
 
         return member
 

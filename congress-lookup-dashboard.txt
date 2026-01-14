@@ -32,3 +32,5 @@
     {"name": "Technology/Internet", "involvementScore": 85, "amount": "N/A (significant)"}
   ]
 }
+2026-01-13 22:10:28,784 - main - INFO - Cached result for 'Alexandria Ocasio-Cortez'
+2026-01-13 22:10:28,831 - main - INFO - Cache hit for query 'Alexandria Ocasio-Cortez' -> 'Alexandria Ocasio-Cortez'
